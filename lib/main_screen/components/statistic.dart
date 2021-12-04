@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:wildhack/constants/colors.dart';
+import 'package:wildhack/wigets/long_empty_button.dart';
+import 'package:wildhack/wigets/long_filled_button.dart';
 
 class Statistics extends StatelessWidget {
   const Statistics({Key? key}) : super(key: key);
@@ -12,46 +14,92 @@ class Statistics extends StatelessWidget {
       height: MediaQuery.of(context).size.height,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Padding(
-            padding: EdgeInsets.fromLTRB(30, 60, 30, 30),
-            child: Text(
-              'Статистика',
-              style: TextStyle(
-                color: AppColors.darkGray,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          StatisticsCardWithDiagram(
+        children: [
+          const Title(text: 'Статистика'),
+          const StatisticsCardWithDiagram(
             mainText: 'Всего фото \nобработано',
             amount: 100,
             total: 560,
             color: AppColors.blue,
           ),
-          StatisticsCardWithDiagram(
+          const StatisticsCardWithDiagram(
             mainText: 'Фотографий \nживотных',
             amount: 30,
             total: 43,
             color: AppColors.lightOrange,
           ),
-          StatisticsCard(
+          const StatisticsCard(
             mainText: 'Видео \nзагружено',
             total: 43,
           ),
+          const Status(color: AppColors.blue, text: 'Данные обрабатываются'),
+          const Spacer(),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30.0),
-            child: Text(
-              'Данные обрабатываются',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                color: AppColors.blue,
-              ),
+            padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
+            child: LongFilledButton(
+              buttonColor: AppColors.blue,
+              onPressed: () {},
+              textValue: 'Продолжить',
+              textColor: AppColors.white,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
+            child: LongEmptyButton(
+              color: AppColors.blue,
+              onPressed: () {},
+              textValue: 'Продолжить',
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class Status extends StatelessWidget {
+  final Color color;
+  final String text;
+  const Status({
+    Key? key,
+    required this.color,
+    required this.text,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class Title extends StatelessWidget {
+  final String text;
+  const Title({
+    Key? key,
+    required this.text,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(30, 60, 30, 30),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: AppColors.darkGray,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
