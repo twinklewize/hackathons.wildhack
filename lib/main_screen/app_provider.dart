@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart';
 import 'package:wildhack/models/folder.dart';
 
 class AppProvider with ChangeNotifier {
@@ -60,9 +61,20 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> pickFiles2(List<File> files) async {
-    // _chosenFiles = files.map((file) => PlatformFile(file)).toList();
-
+  Future<void> pickFilesWithDragNDrop(List<File> files) async {
+    _isLoading = true;
+    notifyListeners();
+    _chosenFiles.addAll(files
+        .map(
+          (file) => PlatformFile(
+            path: file.path,
+            name: basename(file.path),
+            size: file.lengthSync(),
+          ),
+        )
+        .toList());
+    _isLoading = false;
+    _userAborted = _chosenFiles.isEmpty;
     notifyListeners();
   }
 

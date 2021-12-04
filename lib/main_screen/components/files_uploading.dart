@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:wildhack/constants/colors.dart';
+import 'package:wildhack/main_screen/app_provider.dart';
 
 class FilesUploading extends StatefulWidget {
   const FilesUploading({Key? key}) : super(key: key);
@@ -30,9 +32,11 @@ class _FilesUploadingState extends State<FilesUploading> {
             isDragging = false;
           });
         },
-        onDragDone: (details) => {
-          files.addAll(details.urls),
-          files.map(buildFile).toList(),
+        onDragDone: (details) async {
+          files.addAll(details.urls);
+          await Provider.of<AppProvider>(context, listen: false)
+              .pickFilesWithDragNDrop(
+                  files.map((e) => File(e.toFilePath())).toList());
         },
         child: Container(
           height: double.infinity,
@@ -79,9 +83,5 @@ class _FilesUploadingState extends State<FilesUploading> {
         ),
       ),
     );
-  }
-
-  File buildFile(Uri file) {
-    return File(file.toFilePath());
   }
 }
