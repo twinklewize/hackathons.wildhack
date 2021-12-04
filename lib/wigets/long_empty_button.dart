@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:wildhack/constants/colors.dart';
 
 class LongEmptyButton extends StatelessWidget {
   final String textValue;
-  final Function() onPressed;
+  final Function onPressed;
   final Color color;
 
   // ignore: use_key_in_widget_constructors
@@ -27,7 +28,13 @@ class LongEmptyButton extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => onPressed(),
+            onTap: () async {
+              await onPressed();
+            },
+            splashColor: AppColors.blue.withOpacity(0.2),
+            hoverColor: AppColors.lightBlue.withOpacity(0.5),
+            focusColor: AppColors.lightBlue,
+            highlightColor: AppColors.lightBlue,
             borderRadius: BorderRadius.circular(8),
             child: Center(
               child: Text(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:wildhack/constants/colors.dart';
+import 'package:wildhack/main_screen/app_provider.dart';
 import 'package:wildhack/wigets/long_empty_button.dart';
 import 'package:wildhack/wigets/long_filled_button.dart';
 
@@ -16,29 +18,38 @@ class Statistics extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Title(text: 'Статистика'),
-          const StatisticsCardWithDiagram(
-            mainText: 'Всего фото \nобработано',
-            amount: 100,
-            total: 560,
-            color: AppColors.blue,
+          // const StatisticsCardWithDiagram(
+          //   mainText: 'Всего фото \nобработано',
+          //   amount: 100,
+          //   total: 560,
+          //   color: AppColors.blue,
+          // ),
+          // const StatisticsCardWithDiagram(
+          //   mainText: 'Фотографий \nживотных',
+          //   amount: 30,
+          //   total: 43,
+          //   color: AppColors.lightOrange,
+          // ),
+          StatisticsCard(
+            mainText: 'Фотографий \nзагружено',
+            total: Provider.of<AppProvider>(context, listen: true)
+                .chosenFiles
+                .length,
           ),
-          const StatisticsCardWithDiagram(
-            mainText: 'Фотографий \nживотных',
-            amount: 30,
-            total: 43,
-            color: AppColors.lightOrange,
-          ),
-          const StatisticsCard(
-            mainText: 'Видео \nзагружено',
-            total: 43,
-          ),
-          const Status(color: AppColors.blue, text: 'Данные обрабатываются'),
+          // const StatisticsCard(
+          //   mainText: 'Видео \nзагружено',
+          //   total: 43,
+          // ),
+          // const Status(color: AppColors.blue, text: 'Данные обрабатываются'),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
             child: LongEmptyButton(
               color: AppColors.darkGray,
-              onPressed: () {},
+              onPressed: () async {
+                await Provider.of<AppProvider>(context, listen: false)
+                    .clearCachedFiles();
+              },
               textValue: 'Очистить',
             ),
           ),

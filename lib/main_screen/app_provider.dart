@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wildhack/models/folder.dart';
 
 class AppProvider with ChangeNotifier {
-  List<Folder> _folders = [];
+  final List<Folder> _folders = [];
   List<PlatformFile> _chosenFiles = [];
   bool _isLoading = false;
   bool _userAborted = false;
@@ -55,6 +57,12 @@ class AppProvider with ChangeNotifier {
     }
     _isLoading = false;
     _userAborted = _chosenFiles.isEmpty;
+    notifyListeners();
+  }
+
+  Future<void> pickFiles2(List<File> files) async {
+    // _chosenFiles = files.map((file) => PlatformFile(file)).toList();
+
     notifyListeners();
   }
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../constants/colors.dart';
+
 class LongFilledButton extends StatelessWidget {
   final String textValue;
-  final Function() onPressed;
+  final Function onPressed;
   final Color textColor;
   final Color buttonColor;
 
@@ -28,7 +30,9 @@ class LongFilledButton extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => onPressed(),
+            onTap: () async {
+              await onPressed();
+            },
             borderRadius: BorderRadius.circular(8),
             child: Center(
               child: Text(

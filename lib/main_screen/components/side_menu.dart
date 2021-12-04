@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:wildhack/constants/colors.dart';
 import 'package:wildhack/wigets/long_empty_button.dart';
-import 'package:wildhack/wigets/long_filled_button.dart';
+
+import '../app_provider.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -43,13 +45,16 @@ class SideMenu extends StatelessWidget {
             svgSrc: "assets/icons/statistics_icon.svg",
             press: () {},
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
             child: LongEmptyButton(
               color: AppColors.darkGray,
               textValue: 'Загрузить',
-              onPressed: () {},
+              onPressed: () async {
+                await Provider.of<AppProvider>(context, listen: false)
+                    .pickFiles();
+              },
             ),
           )
         ],
@@ -73,6 +78,10 @@ class DrawerListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      splashColor: AppColors.blue.withOpacity(0.15),
+      hoverColor: AppColors.blue.withOpacity(0.05),
+      focusColor: AppColors.blue.withOpacity(0.05),
+      highlightColor: AppColors.blue.withOpacity(0.05),
       onTap: press,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(30, 20, 0, 20),

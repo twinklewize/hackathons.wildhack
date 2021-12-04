@@ -153,27 +153,27 @@ class ChooseFilesPage extends StatelessWidget {
                   ),
 
                   // Кнопка загрузки файлов
-                  appProvider.chosenFiles.isEmpty
-                      ? actionButton(
-                          Provider.of<AppProvider>(context, listen: false)
-                              .pickFiles,
-                          'Pick files',
-                        )
-                      : Row(
-                          children: [
-                            actionButton(
-                              Provider.of<AppProvider>(context, listen: false)
-                                  .pickFiles,
-                              'Pick files',
-                            ),
-                            const SizedBox(width: 10),
-                            actionButton(
-                              Provider.of<AppProvider>(context, listen: false)
-                                  .clearCachedFiles,
-                              'Clear',
-                            )
-                          ],
-                        ),
+                  // appProvider.chosenFiles.isEmpty
+                  //     ? actionButton(
+                  //         Provider.of<AppProvider>(context, listen: false)
+                  //             .pickFiles,
+                  //         'Pick files',
+                  //       )
+                  //     : Row(
+                  //         children: [
+                  //           actionButton(
+                  //             Provider.of<AppProvider>(context, listen: false)
+                  //                 .pickFiles,
+                  //             'Pick files',
+                  //           ),
+                  //           const SizedBox(width: 10),
+                  //           actionButton(
+                  //             Provider.of<AppProvider>(context, listen: false)
+                  //                 .clearCachedFiles,
+                  //             'Clear',
+                  //           )
+                  //         ],
+                  //       ),
                 ],
               ),
             ),
