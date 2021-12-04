@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wildhack/choose_files_page/choose_files_page.dart';
+import 'package:wildhack/main_screen/main_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const FilePickerDemo(),
+      // home: const FilePickerDemo(),
+      home: MainScreen(),
     );
   }
 }
