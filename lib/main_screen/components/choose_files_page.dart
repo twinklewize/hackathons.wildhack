@@ -55,18 +55,18 @@ class ChooseFilesPage extends StatelessWidget {
           onDragDone: (details) async {
             files.addAll(details.urls);
             await Provider.of<AppProvider>(context, listen: false)
-                .pickFilesWithDragNDrop(files
-                    .map(
-                      (uri) => File(
-                        path: uri.path,
-                        name: basename(uri.toFilePath()),
-                        sizeInBytes: io.File(uri.toFilePath())
-                            .statSync()
-                            .size
-                            .toDouble(),
-                      ),
-                    )
-                    .toList());
+                .pickFilesWithDragNDrop(
+              files
+                  .map(
+                    (uri) => File(
+                      path: uri.path,
+                      name: basename(uri.toFilePath()),
+                      sizeInBytes:
+                          io.File(uri.toFilePath()).statSync().size.toDouble(),
+                    ),
+                  )
+                  .toList(),
+            );
           },
           child: Container(
             width: MediaQuery.of(context).size.width * 0.6 - 40,
@@ -147,7 +147,7 @@ class ChooseFilesPage extends StatelessWidget {
                                                     tableCell(
                                                         '     Этап обработки'),
                                                     tableCell(
-                                                        '     Размер файла в байтах'),
+                                                        '     Размер файла в МБ'),
                                                   ],
                                                 ),
 
@@ -158,12 +158,16 @@ class ChooseFilesPage extends StatelessWidget {
                                                     children: <Widget>[
                                                       tableCell(
                                                           "     " + file.name),
-                                                      tableCell('     state'),
+                                                      tableCell('     ' +
+                                                          file.status
+                                                              .toString()),
                                                       tableCell("     " +
-                                                          file.sizeInBytes
+                                                          ((file.sizeInBytes /
+                                                                      1024) /
+                                                                  1024)
                                                               .toStringAsFixed(
-                                                                  2) +
-                                                          " bytes"),
+                                                                  1) +
+                                                          " МБ"),
                                                     ],
                                                   ),
                                               ],

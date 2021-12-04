@@ -7,6 +7,7 @@ class AppProvider with ChangeNotifier {
   List<File> _chosenFiles = [];
   bool _isLoading = false;
   bool _userAborted = false;
+
   List<File> get chosenFiles {
     return [..._chosenFiles];
   }
@@ -43,7 +44,6 @@ class AppProvider with ChangeNotifier {
                 ?.files ??
             [];
       }
-      _chosenFiles.clear();
       for (var everyPlatformFile in _chosenPlatformFiles) {
         _chosenFiles.add(
           File(
