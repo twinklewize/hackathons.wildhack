@@ -66,13 +66,13 @@ class DrawerListTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(30, 20, 0, 20),
         child: Row(
           children: [
-            // SvgPicture.asset(
-            //   svgSrc,
-            //   color: AppColors.lightGray,
-            //   height: 24,
-            //   width: 24,
-            // ),
-            // const SizedBox(width: 12),
+            SvgPicture.asset(
+              svgSrc,
+              color: AppColors.lightGray,
+              height: 24,
+              width: 24,
+            ),
+            const SizedBox(width: 12),
             Text(
               title,
               style: const TextStyle(
