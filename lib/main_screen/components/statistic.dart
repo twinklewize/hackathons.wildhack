@@ -35,20 +35,20 @@ class Statistics extends StatelessWidget {
           const Status(color: AppColors.blue, text: 'Данные обрабатываются'),
           const Spacer(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
-            child: LongFilledButton(
-              buttonColor: AppColors.blue,
+            padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+            child: LongEmptyButton(
+              color: AppColors.darkGray,
               onPressed: () {},
-              textValue: 'Продолжить',
-              textColor: AppColors.white,
+              textValue: 'Очистить',
             ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
-            child: LongEmptyButton(
-              color: AppColors.blue,
+            child: LongFilledButton(
+              buttonColor: AppColors.blue,
               onPressed: () {},
-              textValue: 'Продолжить',
+              textValue: 'Начать обработку',
+              textColor: AppColors.white,
             ),
           ),
         ],
@@ -124,28 +124,58 @@ class StatisticsCardWithDiagram extends StatelessWidget {
     double _value = (amount / total) * 100;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-        height: 128,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.lightBlue,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                mainText,
-                style: const TextStyle(
-                  color: AppColors.darkGray,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 16,
-                ),
-              ),
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+            height: 128,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.lightBlue,
+              borderRadius: BorderRadius.circular(20),
             ),
-            SizedBox(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    mainText,
+                    style: const TextStyle(
+                      color: AppColors.darkGray,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '$amount',
+                      style: const TextStyle(
+                        color: AppColors.lightGray,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      '/$total',
+                      style: const TextStyle(
+                        color: AppColors.lightGray,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 60,
+            left: 60,
+            top: 10,
+            bottom: 10,
+            child: SizedBox(
               height: 88,
               width: 88,
               child: SfRadialGauge(axes: <RadialAxis>[
@@ -189,28 +219,8 @@ class StatisticsCardWithDiagram extends StatelessWidget {
                     ])
               ]),
             ),
-            Row(
-              children: [
-                Text(
-                  '$amount',
-                  style: const TextStyle(
-                    color: AppColors.lightGray,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  '/$total',
-                  style: const TextStyle(
-                    color: AppColors.lightGray,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

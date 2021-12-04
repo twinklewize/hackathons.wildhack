@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wildhack/constants/colors.dart';
 import 'package:wildhack/main_screen/main_screen.dart';
 
 void main() async {

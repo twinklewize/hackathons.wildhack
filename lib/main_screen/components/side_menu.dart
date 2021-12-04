@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wildhack/constants/colors.dart';
+import 'package:wildhack/wigets/long_empty_button.dart';
+import 'package:wildhack/wigets/long_filled_button.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -12,7 +14,8 @@ class SideMenu extends StatelessWidget {
     return Drawer(
       backgroundColor: AppColors.white,
       elevation: 0,
-      child: ListView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
             padding: EdgeInsets.fromLTRB(30, 60, 0, 60),
@@ -40,6 +43,15 @@ class SideMenu extends StatelessWidget {
             svgSrc: "assets/icons/statistics_icon.svg",
             press: () {},
           ),
+          Spacer(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
+            child: LongEmptyButton(
+              color: AppColors.darkGray,
+              textValue: 'Загрузить',
+              onPressed: () {},
+            ),
+          )
         ],
       ),
     );
