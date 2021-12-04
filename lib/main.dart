@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:wildhack/choose_files_page/choose_files_page.dart';
 import 'package:wildhack/main_screen/main_screen.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 

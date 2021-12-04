@@ -16,15 +16,24 @@ class MainScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Expanded(
-              flex: 1,
+              flex: 2,
               child: SideMenu(),
             ),
             Expanded(
-              flex: 3,
-              child: Container(),
+              flex: 8,
+              child: Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(20)),
+                ),
+              ),
             ),
             const Expanded(
-              flex: 1,
+              flex: 3,
               child: Statistics(),
             ),
           ],

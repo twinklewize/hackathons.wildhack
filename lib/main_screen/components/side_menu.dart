@@ -73,12 +73,14 @@ class DrawerListTile extends StatelessWidget {
               width: 24,
             ),
             const SizedBox(width: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.lightGray,
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.lightGray,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
