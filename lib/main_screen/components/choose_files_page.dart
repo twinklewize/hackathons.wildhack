@@ -1,11 +1,12 @@
-// ignore_for_file: avoid_print
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:wildhack/constants/colors.dart';
 import 'package:wildhack/main_screen/app_provider.dart';
+import 'package:wildhack/models/file.dart';
 
 class ChooseFilesPage extends StatelessWidget {
   ChooseFilesPage({Key? key}) : super(key: key);
@@ -38,7 +39,17 @@ class ChooseFilesPage extends StatelessWidget {
             files.addAll(details.urls);
             await Provider.of<AppProvider>(context, listen: false)
                 .pickFilesWithDragNDrop(
-                    files.map((e) => File(e.toFilePath())).toList());
+              files
+                  .map(
+                    (uri) => File(
+                      path: uri.path,
+                      name: basename(uri.toFilePath()),
+                      sizeInBytes:
+                          io.File(uri.toFilePath()).statSync().size.toDouble(),
+                    ),
+                  )
+                  .toList(),
+            );
           },
           child: Container(
             width: MediaQuery.of(context).size.width * 0.6 - 40,
@@ -119,23 +130,27 @@ class ChooseFilesPage extends StatelessWidget {
                                                     tableCell(
                                                         '     Этап обработки'),
                                                     tableCell(
-                                                        '     Размер файла в байтах'),
+                                                        '     Размер файла в МБ'),
                                                   ],
                                                 ),
 
                                                 //данные
-                                                for (var path
+                                                for (var file
                                                     in appProvider.chosenFiles)
                                                   TableRow(
                                                     children: <Widget>[
                                                       tableCell(
-                                                          "     " + path.name),
-                                                      tableCell('     state'),
+                                                          "     " + file.name),
+                                                      tableCell('     ' +
+                                                          file.status
+                                                              .toString()),
                                                       tableCell("     " +
-                                                          path.size
+                                                          ((file.sizeInBytes /
+                                                                      1024) /
+                                                                  1024)
                                                               .toStringAsFixed(
-                                                                  2) +
-                                                          " bytes"),
+                                                                  1) +
+                                                          " МБ"),
                                                     ],
                                                   ),
                                               ],

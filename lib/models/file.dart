@@ -18,16 +18,17 @@ enum AnimalType {
 }
 
 class File {
-  ContentType contentType;
-  PlatformFile path;
-  Status status;
-  bool isAnimal;
-  AnimalType animalType;
+  ContentType contentType = ContentType.image;
+  String path;
+  String name;
+  double sizeInBytes;
+  Status status = Status.waiting;
+  bool isAnimal = false;
+  AnimalType animalType = AnimalType.other;
+
   File({
     required this.path,
-    this.contentType = ContentType.image,
-    this.isAnimal = false,
-    this.status = Status.waiting,
-    this.animalType = AnimalType.other,
+    required this.name,
+    required this.sizeInBytes,
   });
 }
