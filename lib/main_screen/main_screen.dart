@@ -15,16 +15,16 @@ class MainScreen extends StatelessWidget {
       body: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Expanded(
+          children: [
+            const Expanded(
               flex: 2,
               child: SideMenu(),
             ),
             Expanded(
               flex: 8,
-              child: FilePickerDemo(),
+              child: ChooseFilesPage(),
             ),
-            Expanded(
+            const Expanded(
               flex: 3,
               child: Statistics(),
             ),
