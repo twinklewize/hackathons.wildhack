@@ -1,22 +1,13 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart';
-import 'package:wildhack/models/folder.dart';
+import 'package:wildhack/models/file.dart';
 
 class AppProvider with ChangeNotifier {
-  final List<Folder> _folders = [];
-  List<PlatformFile> _chosenFiles = [];
+  List<File> _chosenFiles = [];
   bool _isLoading = false;
   bool _userAborted = false;
-
-  List<Folder> get folders {
-    return [..._folders];
-  }
-
-  List<PlatformFile> get chosenFiles {
+  List<File> get chosenFiles {
     return [..._chosenFiles];
   }
 
@@ -31,9 +22,10 @@ class AppProvider with ChangeNotifier {
   Future<void> pickFiles() async {
     _isLoading = true;
     notifyListeners();
+    List<PlatformFile> _chosenPlatformFiles = [];
     try {
       if (chosenFiles.isNotEmpty) {
-        _chosenFiles.addAll(
+        _chosenPlatformFiles.addAll(
           (await FilePicker.platform.pickFiles(
                 type: FileType.any,
                 allowMultiple: true,
@@ -43,13 +35,23 @@ class AppProvider with ChangeNotifier {
               [],
         );
       } else {
-        _chosenFiles = (await FilePicker.platform.pickFiles(
+        _chosenPlatformFiles = (await FilePicker.platform.pickFiles(
               type: FileType.any,
               allowMultiple: true,
               onFileLoading: (FilePickerStatus status) => print(status),
             ))
                 ?.files ??
             [];
+      }
+      _chosenFiles.clear();
+      for (var everyPlatformFile in _chosenPlatformFiles) {
+        _chosenFiles.add(
+          File(
+            path: everyPlatformFile.path!,
+            sizeInBytes: everyPlatformFile.size.toDouble(),
+            name: everyPlatformFile.name,
+          ),
+        );
       }
     } on PlatformException catch (e) {
       print(e.toString());
@@ -64,15 +66,7 @@ class AppProvider with ChangeNotifier {
   Future<void> pickFilesWithDragNDrop(List<File> files) async {
     _isLoading = true;
     notifyListeners();
-    _chosenFiles.addAll(files
-        .map(
-          (file) => PlatformFile(
-            path: file.path,
-            name: basename(file.path),
-            size: file.lengthSync(),
-          ),
-        )
-        .toList());
+    _chosenFiles.addAll(files);
     _isLoading = false;
     _userAborted = _chosenFiles.isEmpty;
     notifyListeners();
@@ -92,4 +86,6 @@ class AppProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<void> sendFilePathsToBackend() async {}
 }

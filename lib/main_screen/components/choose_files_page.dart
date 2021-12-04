@@ -1,11 +1,12 @@
-// ignore_for_file: avoid_print
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:wildhack/constants/colors.dart';
 import 'package:wildhack/main_screen/app_provider.dart';
+import 'package:wildhack/models/file.dart';
 
 class ChooseFilesPage extends StatelessWidget {
   ChooseFilesPage({Key? key}) : super(key: key);
@@ -54,8 +55,18 @@ class ChooseFilesPage extends StatelessWidget {
           onDragDone: (details) async {
             files.addAll(details.urls);
             await Provider.of<AppProvider>(context, listen: false)
-                .pickFilesWithDragNDrop(
-                    files.map((e) => File(e.toFilePath())).toList());
+                .pickFilesWithDragNDrop(files
+                    .map(
+                      (uri) => File(
+                        path: uri.path,
+                        name: basename(uri.toFilePath()),
+                        sizeInBytes: io.File(uri.toFilePath())
+                            .statSync()
+                            .size
+                            .toDouble(),
+                      ),
+                    )
+                    .toList());
           },
           child: Container(
             width: MediaQuery.of(context).size.width * 0.6 - 40,
@@ -141,15 +152,15 @@ class ChooseFilesPage extends StatelessWidget {
                                                 ),
 
                                                 //данные
-                                                for (var path
+                                                for (var file
                                                     in appProvider.chosenFiles)
                                                   TableRow(
                                                     children: <Widget>[
                                                       tableCell(
-                                                          "     " + path.name),
+                                                          "     " + file.name),
                                                       tableCell('     state'),
                                                       tableCell("     " +
-                                                          path.size
+                                                          file.sizeInBytes
                                                               .toStringAsFixed(
                                                                   2) +
                                                           " bytes"),
@@ -163,29 +174,6 @@ class ChooseFilesPage extends StatelessWidget {
                                     )
                                   : const SizedBox(),
                     ),
-
-                    // Кнопка загрузки файлов
-                    // appProvider.chosenFiles.isEmpty
-                    //     ? actionButton(
-                    //         Provider.of<AppProvider>(context, listen: false)
-                    //             .pickFiles,
-                    //         'Pick files',
-                    //       )
-                    //     : Row(
-                    //         children: [
-                    //           actionButton(
-                    //             Provider.of<AppProvider>(context, listen: false)
-                    //                 .pickFiles,
-                    //             'Pick files',
-                    //           ),
-                    //           const SizedBox(width: 10),
-                    //           actionButton(
-                    //             Provider.of<AppProvider>(context, listen: false)
-                    //                 .clearCachedFiles,
-                    //             'Clear',
-                    //           )
-                    //         ],
-                    //       ),
                   ],
                 ),
               ),
