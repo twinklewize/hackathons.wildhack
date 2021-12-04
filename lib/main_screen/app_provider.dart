@@ -4,17 +4,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
-import 'package:wildhack/models/folder.dart';
 
 class AppProvider with ChangeNotifier {
-  final List<Folder> _folders = [];
   List<PlatformFile> _chosenFiles = [];
   bool _isLoading = false;
   bool _userAborted = false;
-
-  List<Folder> get folders {
-    return [..._folders];
-  }
 
   List<PlatformFile> get chosenFiles {
     return [..._chosenFiles];

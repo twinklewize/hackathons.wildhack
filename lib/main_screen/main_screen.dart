@@ -4,6 +4,7 @@ import 'package:wildhack/constants/colors.dart';
 import 'package:wildhack/main_screen/app_provider.dart';
 import 'package:wildhack/main_screen/components/choose_files_page.dart';
 import 'package:wildhack/main_screen/components/files_uploading.dart';
+import 'package:wildhack/main_screen/components/grid_view_page.dart';
 import 'package:wildhack/main_screen/components/statistic.dart';
 
 import 'components/side_menu.dart';
@@ -27,9 +28,10 @@ class MainScreen extends StatelessWidget {
             Expanded(
               flex: 8,
               // child: ChooseFilesPage(),
-              child: appProvider.chosenFiles.isEmpty
-                  ? FilesUploading()
-                  : ChooseFilesPage(),
+              // child: appProvider.chosenFiles.isEmpty
+              //     ? FilesUploading()
+              //     : ChooseFilesPage(),
+              child: GridViewPage(),
             ),
             appProvider.chosenFiles.isEmpty
                 ? Container()

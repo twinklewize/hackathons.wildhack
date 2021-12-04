@@ -27,23 +27,6 @@ class ChooseFilesPage extends StatelessWidget {
     );
   }
 
-  Widget actionButton(Function function, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 50.0, bottom: 20.0),
-      child: Column(
-        children: <Widget>[
-          ElevatedButton(
-            onPressed: () async {
-              await function();
-            },
-            child: Text(text),
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final Set<Uri> files = {};
@@ -163,29 +146,6 @@ class ChooseFilesPage extends StatelessWidget {
                                     )
                                   : const SizedBox(),
                     ),
-
-                    // Кнопка загрузки файлов
-                    // appProvider.chosenFiles.isEmpty
-                    //     ? actionButton(
-                    //         Provider.of<AppProvider>(context, listen: false)
-                    //             .pickFiles,
-                    //         'Pick files',
-                    //       )
-                    //     : Row(
-                    //         children: [
-                    //           actionButton(
-                    //             Provider.of<AppProvider>(context, listen: false)
-                    //                 .pickFiles,
-                    //             'Pick files',
-                    //           ),
-                    //           const SizedBox(width: 10),
-                    //           actionButton(
-                    //             Provider.of<AppProvider>(context, listen: false)
-                    //                 .clearCachedFiles,
-                    //             'Clear',
-                    //           )
-                    //         ],
-                    //       ),
                   ],
                 ),
               ),
