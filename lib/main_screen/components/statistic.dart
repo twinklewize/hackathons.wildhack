@@ -33,7 +33,7 @@ class Statistics extends StatelessWidget {
           StatisticsCard(
             mainText: 'Фотографий \nзагружено',
             total: Provider.of<AppProvider>(context, listen: true)
-                .chosenFiles
+                .filesWithoutAnimal
                 .length,
           ),
           // const StatisticsCard(

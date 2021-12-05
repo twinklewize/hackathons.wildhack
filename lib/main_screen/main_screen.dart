@@ -27,7 +27,7 @@ class MainScreen extends StatelessWidget {
             ),
             Expanded(
               flex: 8,
-              child: appProvider.chosenFiles.isEmpty
+              child: appProvider.filesWithoutAnimal.isEmpty
                   ? const FilesUploading()
                   : Column(
                       mainAxisSize: MainAxisSize.min,
@@ -36,23 +36,23 @@ class MainScreen extends StatelessWidget {
                         Expanded(
                           child: FilesViewWidget(
                             title: 'Загруженные файлы',
-                            files:
-                                Provider.of<AppProvider>(context).chosenFiles,
+                            files: Provider.of<AppProvider>(context)
+                                .filesWithoutAnimal,
                           ),
                         ),
                         const SizedBox(height: 30),
                         Expanded(
                           child: FilesViewWidget(
                             title: 'Загруженные файлы',
-                            files:
-                                Provider.of<AppProvider>(context).chosenFiles,
+                            files: Provider.of<AppProvider>(context)
+                                .filesWithoutAnimal,
                           ),
                         ),
                         const SizedBox(height: 30),
                       ],
                     ),
             ),
-            appProvider.chosenFiles.isEmpty
+            appProvider.filesWithoutAnimal.isEmpty
                 ? Container()
                 : const Expanded(
                     flex: 3,

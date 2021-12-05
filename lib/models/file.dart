@@ -22,13 +22,15 @@ class File {
   String path;
   String name;
   double sizeInBytes;
-  Status status = Status.waiting;
-  bool isAnimal = false;
+  Status status;
+  bool isAnimal;
   AnimalType animalType = AnimalType.other;
 
   File({
     required this.path,
     required this.name,
     required this.sizeInBytes,
+    this.isAnimal = false,
+    this.status = Status.waiting,
   });
 }

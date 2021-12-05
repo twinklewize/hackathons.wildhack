@@ -1,31 +1,50 @@
+import 'dart:convert';
+import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart';
 import 'package:wildhack/models/file.dart';
+import 'package:http/http.dart' as http;
 
 class AppProvider with ChangeNotifier {
-  List<File> _chosenFiles = [];
+  // сначала все файлы попадают сюда
+  List<File> _filesWithoutAnimal = [];
+
+  // но если животное на фото будет, то он попадет сюда
+  List<File> _filesWithAnimal = [];
+
   bool _isLoading = false;
+  bool _isWaitingFilesFromBackend = false;
   bool _userAborted = false;
 
-  List<File> get chosenFiles {
-    return [..._chosenFiles];
+  List<File> get filesWithoutAnimal {
+    return [..._filesWithoutAnimal];
+  }
+
+  List<File> get filesWithAnimal {
+    return [..._filesWithAnimal];
   }
 
   bool get isLoading {
     return _isLoading;
   }
 
+  bool get isWaitingFilesFromBackend {
+    return _isWaitingFilesFromBackend;
+  }
+
   bool get userAborted {
     return _userAborted;
   }
 
+  // выбор файлов при нажатии кнопки "Загрузить"
   Future<void> pickFiles() async {
     _isLoading = true;
     notifyListeners();
     List<PlatformFile> _chosenPlatformFiles = [];
     try {
-      if (chosenFiles.isNotEmpty) {
+      if (filesWithoutAnimal.isNotEmpty) {
         _chosenPlatformFiles.addAll(
           (await FilePicker.platform.pickFiles(
                 type: FileType.any,
@@ -45,7 +64,7 @@ class AppProvider with ChangeNotifier {
             [];
       }
       for (var everyPlatformFile in _chosenPlatformFiles) {
-        _chosenFiles.add(
+        _filesWithoutAnimal.add(
           File(
             path: everyPlatformFile.path!,
             sizeInBytes: everyPlatformFile.size.toDouble(),
@@ -53,30 +72,35 @@ class AppProvider with ChangeNotifier {
           ),
         );
       }
+
+      // // удаление повторяющихся файлов
+      // _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
     } on PlatformException catch (e) {
       print(e.toString());
     } catch (e) {
       print(e.toString());
     }
     _isLoading = false;
-    _userAborted = _chosenFiles.isEmpty;
+    _userAborted = filesWithoutAnimal.isEmpty;
     notifyListeners();
   }
 
+  // принятие файлов драг-н-дроп зоной
   Future<void> pickFilesWithDragNDrop(List<File> files) async {
-    _isLoading = true;
-    notifyListeners();
-    _chosenFiles.addAll(files);
-    _isLoading = false;
-    _userAborted = _chosenFiles.isEmpty;
+    // добавление файлов в общий список
+    _filesWithoutAnimal.addAll(files);
+    // // удаление повторяющихся файлов
+    // _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
+    _userAborted = filesWithoutAnimal.isEmpty;
     notifyListeners();
   }
 
+  // очистить рабочую зону
   Future<void> clearCachedFiles() async {
     _isLoading = true;
     notifyListeners();
     try {
-      _chosenFiles.clear();
+      _filesWithoutAnimal.clear();
     } on PlatformException catch (e) {
       print("PlatformException " + e.toString());
     } catch (e) {
@@ -87,5 +111,78 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendFilePathsToBackend() async {}
+  // отправить загруженные файлы на бэк
+  Future<void> sendFilePathsToBackend() async {
+    // отправляем список файлов на бэк
+    final url = Uri.parse('http://localhost:2021/api/sendPaths');
+    List<String> filePaths = [];
+    for (var chosenFile in filesWithoutAnimal) {
+      filePaths.add(chosenFile.path);
+    }
+    final response = await http.post(
+      url,
+      headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
+      body: json.encode(
+        {
+          'filePaths': filePaths,
+        },
+      ),
+    );
+    print(response.body);
+
+    // присваиваем всем файлам режим "в обработке"
+    for (var chosenFile in filesWithoutAnimal) {
+      chosenFile.status = Status.loading;
+    }
+    _isWaitingFilesFromBackend = true;
+    notifyListeners();
+
+    // смотрим, сколько файлов нам нужно получить с бэка
+    int howManyFilesShouldWeRecieve = filesWithoutAnimal.length;
+
+    // получаем файлы с бэка, пока не получим все, что нужно
+    // отправляем запрос раз в секунду, чтобы не убить сервер
+    while (filesWithAnimal.length < howManyFilesShouldWeRecieve) {
+      await Future.delayed(const Duration(seconds: 1));
+      await _getResultFromBackend();
+    }
+
+    // окончание процесса обработки
+    _isWaitingFilesFromBackend = false;
+    notifyListeners();
+  }
+
+  // получать результаты с бэка
+  Future<void> _getResultFromBackend() async {
+    // отправляем запрос на получение списка из нескольких проверенных файлов
+    final url = Uri.parse('http://localhost:2021/api/getResults');
+    final response = await http.post(
+      url,
+      headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
+      body: json.encode({}),
+    );
+    print(response.body);
+    final decodedResponse = jsonDecode(response.body);
+
+    // добавляем каждый пришедший файл в список с животными и удаляем из списка без животных
+    for (var responseFile in decodedResponse) {
+      if (responseFile['isAnimal'] == true) {
+        // добавление в список с животными
+        filesWithAnimal.add(
+          File(
+            path: responseFile['path'],
+            name: basename(responseFile['path']),
+            sizeInBytes:
+                io.File(responseFile['path']).statSync().size.toDouble(),
+            isAnimal: responseFile['isAnimal'],
+            status: Status.loaded,
+          ),
+        );
+        // удаление из списка без животных
+        filesWithoutAnimal
+            .removeWhere((element) => element.path == responseFile['path']);
+      }
+    }
+    notifyListeners();
+  }
 }
