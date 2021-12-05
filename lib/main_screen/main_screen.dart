@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wildhack/constants/colors.dart';
 import 'package:wildhack/main_screen/app_provider.dart';
-import 'package:wildhack/main_screen/components/choose_files_page.dart';
 import 'package:wildhack/main_screen/components/files_uploading.dart';
 import 'package:wildhack/main_screen/components/files_view_widget.dart';
+import 'package:wildhack/main_screen/components/folders_widget.dart';
 import 'package:wildhack/main_screen/components/statistic.dart';
 
 import 'components/side_menu.dart';
@@ -36,16 +38,16 @@ class MainScreen extends StatelessWidget {
                         Expanded(
                           child: FilesViewWidget(
                             title: 'Загруженные файлы',
-                            files: Provider.of<AppProvider>(context)
-                                .filesWithoutAnimal,
+                            files: appProvider.filesWithoutAnimal,
                           ),
                         ),
                         const SizedBox(height: 30),
                         Expanded(
                           child: FilesViewWidget(
                             title: 'Загруженные файлы',
-                            files: Provider.of<AppProvider>(context)
-                                .filesWithoutAnimal,
+                            files: appProvider.filesWithoutAnimal,
+                            withFolders: true,
+                            dragNDropOn: false,
                           ),
                         ),
                         const SizedBox(height: 30),

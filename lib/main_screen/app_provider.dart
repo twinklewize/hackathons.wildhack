@@ -15,10 +15,10 @@ enum AppState {
 }
 
 class AppProvider with ChangeNotifier {
-  // сначала все файлы попадают сюда
+// сначала все файлы попадают сюда
   List<File> _filesWithoutAnimal = [];
 
-  // но если животное на фото будет, то он попадет сюда
+// но если животное на фото будет, то он попадет сюда
   List<File> _filesWithAnimal = [];
 
   bool _isWaitingFilesFromBackend = false;
@@ -99,8 +99,8 @@ class AppProvider with ChangeNotifier {
         );
       }
 
-      // // удаление повторяющихся файлов
-      // _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
+// // удаление повторяющихся файлов
+// _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
     } on PlatformException catch (e) {
       print(e.toString());
     } catch (e) {
@@ -110,17 +110,17 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // принятие файлов драг-н-дроп зоной
+// принятие файлов драг-н-дроп зоной
   Future<void> pickFilesWithDragNDrop(List<File> files) async {
-    // добавление файлов в общий список
+// добавление файлов в общий список
     _filesWithoutAnimal.addAll(files);
-    // // удаление повторяющихся файлов
-    // _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
+// // удаление повторяющихся файлов
+// _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
     _userAborted = filesWithoutAnimal.isEmpty;
     notifyListeners();
   }
 
-  // очистить рабочую зону
+// очистить рабочую зону
   Future<void> clearCachedFiles() async {
     notifyListeners();
     try {
@@ -133,9 +133,9 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // отправить загруженные файлы на бэк
+// отправить загруженные файлы на бэк
   Future<void> sendFilePathsToBackend() async {
-    // отправляем список файлов на бэк
+    // // отправляем список файлов на бэк
     final url = Uri.parse('http://localhost:2021/api/sendPaths');
     List<String> filePaths = [];
     for (var chosenFile in filesWithoutAnimal) {
@@ -158,7 +158,7 @@ class AppProvider with ChangeNotifier {
     _isWaitingFilesFromBackend = true;
     notifyListeners();
 
-    // смотрим, сколько файлов нам нужно получить с бэка
+// смотрим, сколько файлов нам нужно получить с бэка
     int howManyFilesShouldWeRecieve = filesWithoutAnimal.length;
 
     // получаем файлы с бэка, пока не получим все, что нужно
@@ -167,14 +167,14 @@ class AppProvider with ChangeNotifier {
       await _getResultFromBackend();
     } while (allLoadedFiles.length < howManyFilesShouldWeRecieve);
 
-    // окончание процесса обработки
+// окончание процесса обработки
     _isWaitingFilesFromBackend = false;
     notifyListeners();
   }
 
-  // получать результаты с бэка
+// получать результаты с бэка
   Future<void> _getResultFromBackend() async {
-    // отправляем запрос на получение списка из нескольких проверенных файлов
+// отправляем запрос на получение списка из нескольких проверенных файлов
     final url = Uri.parse('http://localhost:2021/api/getResults');
     final response = await http.post(
       url,

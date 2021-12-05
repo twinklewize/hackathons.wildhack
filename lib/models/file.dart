@@ -1,5 +1,3 @@
-import 'package:file_picker/file_picker.dart';
-
 enum ContentType {
   video,
   image,
