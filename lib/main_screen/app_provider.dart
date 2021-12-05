@@ -145,8 +145,9 @@ class AppProvider with ChangeNotifier {
 // отправить загруженные файлы на бэк
   Future<void> sendFilePathsToBackend() async {
     // отправляем список файлов на бэк
-    final url = Uri.parse('http://localhost:2021/api/parser');
     _appState = AppState.loading;
+    notifyListeners();
+    final url = Uri.parse('http://localhost:2021/api/parser');
     List<String> filePaths = [];
     for (var chosenFile in filesWithoutAnimal) {
       filePaths.add(chosenFile.path);
