@@ -133,10 +133,10 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
-// отправить загруженные файлы на бэк
+  // отправить загруженные файлы на бэк
   Future<void> sendFilePathsToBackend() async {
     // // отправляем список файлов на бэк
-    final url = Uri.parse('http://localhost:2021/api/sendPaths');
+    final url = Uri.parse('http://192.168.50.65:1488/api/parser');
     List<String> filePaths = [];
     for (var chosenFile in filesWithoutAnimal) {
       filePaths.add(chosenFile.path);
@@ -144,11 +144,7 @@ class AppProvider with ChangeNotifier {
     final response = await http.post(
       url,
       headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
-      body: json.encode(
-        {
-          'filePaths': filePaths,
-        },
-      ),
+      body: json.encode(filePaths),
     );
 
     // присваиваем всем файлам режим "в обработке"
@@ -164,6 +160,7 @@ class AppProvider with ChangeNotifier {
     // получаем файлы с бэка, пока не получим все, что нужно
     // отправляем запрос раз в секунду, чтобы не убить сервер
     do {
+      await Future.delayed(const Duration(seconds: 1));
       await _getResultFromBackend();
     } while (allLoadedFiles.length < howManyFilesShouldWeRecieve);
 
@@ -175,7 +172,7 @@ class AppProvider with ChangeNotifier {
 // получать результаты с бэка
   Future<void> _getResultFromBackend() async {
 // отправляем запрос на получение списка из нескольких проверенных файлов
-    final url = Uri.parse('http://localhost:2021/api/getResults');
+    final url = Uri.parse('http://192.168.50.65:1488/api/get');
     final response = await http.post(
       url,
       headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
@@ -187,26 +184,28 @@ class AppProvider with ChangeNotifier {
     // добавляем каждый пришедший файл в список с животными
     // и удаляем из списка без животных
     for (var responseFile in decodedResponse) {
-      if (responseFile['isAnimal'] == true) {
-        // добавление в список с животными
-        _filesWithAnimal.add(
-          File(
-            path: responseFile['path'],
-            name: basename(responseFile['path']),
-            sizeInBytes:
-                io.File(responseFile['path']).statSync().size.toDouble(),
-            isAnimal: responseFile['isAnimal'],
-            status: Status.loaded,
-          ),
-        );
-        // удаление из списка без животных
-        _filesWithoutAnimal
-            .removeWhere((element) => element.path == responseFile['path']);
-      } else {
-        // оставляем в папке без животных
-        _filesWithoutAnimal
-            .firstWhere((file) => file.path == responseFile['path'])
-            .status = Status.loaded;
+      if (responseFile != null) {
+        if (responseFile['hasAnimal'] == true) {
+          // добавление в список с животными
+          _filesWithAnimal.add(
+            File(
+              path: responseFile['path'],
+              name: basename(responseFile['path']),
+              sizeInBytes:
+                  io.File(responseFile['path']).statSync().size.toDouble(),
+              isAnimal: responseFile['hasAnimal'],
+              status: Status.loaded,
+            ),
+          );
+          // удаление из списка без животных
+          _filesWithoutAnimal
+              .removeWhere((element) => element.path == responseFile['path']);
+        } else {
+          // оставляем в папке без животных
+          _filesWithoutAnimal
+              .firstWhere((file) => file.path == responseFile['path'])
+              .status = Status.loaded;
+        }
       }
       notifyListeners();
     }
