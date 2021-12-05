@@ -7,6 +7,13 @@ import 'package:path/path.dart';
 import 'package:wildhack/models/file.dart';
 import 'package:http/http.dart' as http;
 
+enum AppState {
+  empty, // когда файлы не загружены в систему
+  waiting, // когда они загружены
+  loading, // когда файлы анализируются бэком
+  loaded, // файлы загружены
+}
+
 class AppProvider with ChangeNotifier {
   // сначала все файлы попадают сюда
   List<File> _filesWithoutAnimal = [];
@@ -14,7 +21,6 @@ class AppProvider with ChangeNotifier {
   // но если животное на фото будет, то он попадет сюда
   List<File> _filesWithAnimal = [];
 
-  bool _isLoading = false;
   bool _isWaitingFilesFromBackend = false;
   bool _userAborted = false;
 
@@ -26,10 +32,6 @@ class AppProvider with ChangeNotifier {
     return [..._filesWithAnimal];
   }
 
-  bool get isLoading {
-    return _isLoading;
-  }
-
   bool get isWaitingFilesFromBackend {
     return _isWaitingFilesFromBackend;
   }
@@ -38,9 +40,33 @@ class AppProvider with ChangeNotifier {
     return _userAborted;
   }
 
+  List<File> get allLoadedFiles {
+    List<File> loaded = [];
+    for (var file in filesWithAnimal) {
+      if (file.status == Status.loaded) {
+        loaded.add(file);
+      }
+    }
+    for (var file in filesWithoutAnimal) {
+      if (file.status == Status.loaded) {
+        loaded.add(file);
+      }
+    }
+    return loaded;
+  }
+
+  List<File> get allLoadedButEmpty {
+    List<File> result = [];
+    for (var file in allLoadedFiles) {
+      if (file.isAnimal == false) {
+        result.add(file);
+      }
+    }
+    return result;
+  }
+
   // выбор файлов при нажатии кнопки "Загрузить"
   Future<void> pickFiles() async {
-    _isLoading = true;
     notifyListeners();
     List<PlatformFile> _chosenPlatformFiles = [];
     try {
@@ -80,7 +106,6 @@ class AppProvider with ChangeNotifier {
     } catch (e) {
       print(e.toString());
     }
-    _isLoading = false;
     _userAborted = filesWithoutAnimal.isEmpty;
     notifyListeners();
   }
@@ -97,7 +122,6 @@ class AppProvider with ChangeNotifier {
 
   // очистить рабочую зону
   Future<void> clearCachedFiles() async {
-    _isLoading = true;
     notifyListeners();
     try {
       _filesWithoutAnimal.clear();
@@ -105,9 +129,7 @@ class AppProvider with ChangeNotifier {
       print("PlatformException " + e.toString());
     } catch (e) {
       print(e.toString());
-    } finally {
-      _isLoading = false;
-    }
+    } finally {}
     notifyListeners();
   }
 
@@ -128,10 +150,9 @@ class AppProvider with ChangeNotifier {
         },
       ),
     );
-    print(response.body);
 
     // присваиваем всем файлам режим "в обработке"
-    for (var chosenFile in filesWithoutAnimal) {
+    for (var chosenFile in _filesWithoutAnimal) {
       chosenFile.status = Status.loading;
     }
     _isWaitingFilesFromBackend = true;
@@ -142,10 +163,9 @@ class AppProvider with ChangeNotifier {
 
     // получаем файлы с бэка, пока не получим все, что нужно
     // отправляем запрос раз в секунду, чтобы не убить сервер
-    while (filesWithAnimal.length < howManyFilesShouldWeRecieve) {
-      await Future.delayed(const Duration(seconds: 1));
+    do {
       await _getResultFromBackend();
-    }
+    } while (allLoadedFiles.length < howManyFilesShouldWeRecieve);
 
     // окончание процесса обработки
     _isWaitingFilesFromBackend = false;
@@ -164,11 +184,12 @@ class AppProvider with ChangeNotifier {
     print(response.body);
     final decodedResponse = jsonDecode(response.body);
 
-    // добавляем каждый пришедший файл в список с животными и удаляем из списка без животных
+    // добавляем каждый пришедший файл в список с животными
+    // и удаляем из списка без животных
     for (var responseFile in decodedResponse) {
       if (responseFile['isAnimal'] == true) {
         // добавление в список с животными
-        filesWithAnimal.add(
+        _filesWithAnimal.add(
           File(
             path: responseFile['path'],
             name: basename(responseFile['path']),
@@ -179,10 +200,15 @@ class AppProvider with ChangeNotifier {
           ),
         );
         // удаление из списка без животных
-        filesWithoutAnimal
+        _filesWithoutAnimal
             .removeWhere((element) => element.path == responseFile['path']);
+      } else {
+        // оставляем в папке без животных
+        _filesWithoutAnimal
+            .firstWhere((file) => file.path == responseFile['path'])
+            .status = Status.loaded;
       }
+      notifyListeners();
     }
-    notifyListeners();
   }
 }

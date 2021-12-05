@@ -57,7 +57,10 @@ class Statistics extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
             child: LongFilledButton(
               buttonColor: AppColors.blue,
-              onPressed: () {},
+              onPressed: () {
+                Provider.of<AppProvider>(context, listen: false)
+                    .sendFilePathsToBackend();
+              },
               textValue: 'Начать обработку',
               textColor: AppColors.white,
             ),
