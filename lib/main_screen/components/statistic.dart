@@ -1,3 +1,6 @@
+import 'dart:io' as io;
+
+import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
@@ -98,7 +101,17 @@ class Statistics extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
                   child: LongFilledButton(
                     buttonColor: AppColors.blue,
-                    onPressed: () {},
+                    onPressed: () {
+                      var encoder = ZipFileEncoder();
+                      encoder.zipDirectory(io.Directory('animals'),
+                          filename: 'animals.zip');
+
+                      // Manually create a zip of a directory and individual files.
+                      // encoder.addDirectory(io.Directory('animals'));
+                      encoder.addFile(
+                          io.File(appProvider.filesWithoutAnimal[0].path));
+                      encoder.close();
+                    },
                     textValue: 'Экспорт',
                     textColor: AppColors.white,
                   ),
