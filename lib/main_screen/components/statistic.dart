@@ -19,53 +19,91 @@ class Statistics extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Title(text: 'Статистика'),
-          StatisticsCardWithDiagram(
-            mainText: 'Всего фото \nобработано',
-            amount: appProvider.allLoadedFiles.length,
-            total: appProvider.filesWithAnimal.length +
-                appProvider.filesWithoutAnimal.length,
-            color: AppColors.blue,
-          ),
-          StatisticsCardWithDiagram(
-            mainText: 'Фотографий \nживотных',
-            amount: appProvider.filesWithAnimal.length,
-            total: appProvider.allLoadedFiles.length,
-            color: AppColors.lightOrange,
-          ),
-          // StatisticsCard(
-          //   mainText: 'Фотографий \nзагружено',
-          //   total: Provider.of<AppProvider>(context, listen: true)
-          //       .filesWithoutAnimal
-          //       .length,
-          // ),
-          // const StatisticsCard(
-          //   mainText: 'Видео \nзагружено',
-          //   total: 43,
-          // ),
-          const Status(color: AppColors.blue, text: 'Данные обрабатываются'),
+          appProvider.appState == AppState.waiting
+              ? StatisticsCard(
+                  mainText: 'Файлов \nзагружено',
+                  total: Provider.of<AppProvider>(context, listen: true)
+                      .filesWithoutAnimal
+                      .length,
+                )
+              : const SizedBox(),
+          appProvider.appState == AppState.loading
+              ? StatisticsCardWithDiagram(
+                  mainText: 'Всего фото \nобработано',
+                  amount: appProvider.allLoadedFiles.length,
+                  total: appProvider.filesWithAnimal.length +
+                      appProvider.filesWithoutAnimal.length,
+                  color: AppColors.blue,
+                )
+              : const SizedBox(),
+          appProvider.appState == AppState.loading ||
+                  appProvider.appState == AppState.loaded
+              ? StatisticsCardWithDiagram(
+                  mainText: 'Фотографий \nживотных',
+                  amount: appProvider.filesWithAnimal.length,
+                  total: appProvider.allLoadedFiles.length,
+                  color: AppColors.lightOrange,
+                )
+              : const SizedBox(),
+          appProvider.appState == AppState.loading
+              ? const Status(
+                  color: AppColors.blue, text: 'Данные обрабатываются')
+              : const SizedBox(),
+          appProvider.appState == AppState.loaded
+              ? const Status(
+                  color: AppColors.orange, text: 'Данные успешно обработаны')
+              : const SizedBox(),
           const Spacer(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
-            child: LongEmptyButton(
-              color: AppColors.darkGray,
-              onPressed: () async {
-                await Provider.of<AppProvider>(context, listen: false)
-                    .clearCachedFiles();
-              },
-              textValue: 'Очистить',
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
-            child: LongFilledButton(
-              buttonColor: AppColors.blue,
-              onPressed: () {
-                appProvider.sendFilePathsToBackend();
-              },
-              textValue: 'Начать обработку',
-              textColor: AppColors.white,
-            ),
-          ),
+          appProvider.appState == AppState.waiting ||
+                  appProvider.appState == AppState.loading
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+                  child: LongEmptyButton(
+                    color: AppColors.darkGray,
+                    onPressed: () async {
+                      await Provider.of<AppProvider>(context, listen: false)
+                          .clearCachedFiles();
+                    },
+                    textValue: 'Очистить',
+                  ),
+                )
+              : const SizedBox(),
+          appProvider.appState == AppState.waiting
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
+                  child: LongFilledButton(
+                    buttonColor: AppColors.blue,
+                    onPressed: () {
+                      appProvider.sendFilePathsToBackend();
+                    },
+                    textValue: 'Начать обработку',
+                    textColor: AppColors.white,
+                  ),
+                )
+              : const SizedBox(),
+          appProvider.appState == AppState.loading
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
+                  child: LongFilledButton(
+                    buttonColor: AppColors.lightBlue,
+                    onPressed: () {},
+                    textValue: 'Продолжить',
+                    textColor: AppColors.darkGray,
+                  ),
+                )
+              : const SizedBox(),
+          // TO DO LOADED
+          appProvider.appState == AppState.loaded
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
+                  child: LongFilledButton(
+                    buttonColor: AppColors.blue,
+                    onPressed: () {},
+                    textValue: 'Экспорт',
+                    textColor: AppColors.white,
+                  ),
+                )
+              : const SizedBox(),
         ],
       ),
     );

@@ -268,7 +268,11 @@ class CustomListView extends StatelessWidget {
           child: Builder(
             builder: (BuildContext context) => files.isNotEmpty
                 ? SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.30,
+                    height: Provider.of<AppProvider>(context, listen: true)
+                                .appState ==
+                            AppState.waiting
+                        ? MediaQuery.of(context).size.height * 0.80
+                        : MediaQuery.of(context).size.height * 0.30,
                     child: Scrollbar(
                       isAlwaysShown: true,
                       controller: scrollController,

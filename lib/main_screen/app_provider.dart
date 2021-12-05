@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:wildhack/models/file.dart';
-import 'package:http/http.dart' as http;
 
 enum AppState {
   empty, // когда файлы не загружены в систему
@@ -16,10 +15,16 @@ enum AppState {
 
 class AppProvider with ChangeNotifier {
 // сначала все файлы попадают сюда
-  List<File> _filesWithoutAnimal = [];
+  final List<File> _filesWithoutAnimal = [];
 
 // но если животное на фото будет, то он попадет сюда
-  List<File> _filesWithAnimal = [];
+  final List<File> _filesWithAnimal = [];
+
+  AppState _appState = AppState.empty;
+
+  AppState get appState {
+    return _appState;
+  }
 
   bool _isWaitingFilesFromBackend = false;
   bool _userAborted = false;
@@ -73,7 +78,7 @@ class AppProvider with ChangeNotifier {
       if (filesWithoutAnimal.isNotEmpty) {
         _chosenPlatformFiles.addAll(
           (await FilePicker.platform.pickFiles(
-                type: FileType.any,
+                type: FileType.image,
                 allowMultiple: true,
                 onFileLoading: (FilePickerStatus status) => print(status),
               ))
@@ -82,7 +87,7 @@ class AppProvider with ChangeNotifier {
         );
       } else {
         _chosenPlatformFiles = (await FilePicker.platform.pickFiles(
-              type: FileType.any,
+              type: FileType.image,
               allowMultiple: true,
               onFileLoading: (FilePickerStatus status) => print(status),
             ))
@@ -107,6 +112,7 @@ class AppProvider with ChangeNotifier {
       print(e.toString());
     }
     _userAborted = filesWithoutAnimal.isEmpty;
+    if (filesWithoutAnimal.isNotEmpty) _appState = AppState.waiting;
     notifyListeners();
   }
 
@@ -117,6 +123,7 @@ class AppProvider with ChangeNotifier {
 // // удаление повторяющихся файлов
 // _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
     _userAborted = filesWithoutAnimal.isEmpty;
+    _appState = AppState.waiting;
     notifyListeners();
   }
 
@@ -125,6 +132,7 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
     try {
       _filesWithoutAnimal.clear();
+      _appState = AppState.empty;
     } on PlatformException catch (e) {
       print("PlatformException " + e.toString());
     } catch (e) {
@@ -137,6 +145,7 @@ class AppProvider with ChangeNotifier {
   Future<void> sendFilePathsToBackend() async {
     // // отправляем список файлов на бэк
     // final url = Uri.parse('http://localhost:2021/api/sendPaths');
+    _appState = AppState.loading;
     List<String> filePaths = [];
     for (var chosenFile in filesWithoutAnimal) {
       filePaths.add(chosenFile.path);
@@ -171,6 +180,7 @@ class AppProvider with ChangeNotifier {
     }
 
 // окончание процесса обработки
+    _appState = AppState.loaded;
     _isWaitingFilesFromBackend = false;
     notifyListeners();
   }
