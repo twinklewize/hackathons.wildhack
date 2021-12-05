@@ -20,73 +20,46 @@ class MainScreen extends StatelessWidget {
       backgroundColor: AppColors.lightBlue,
       // drawer: const SideMenu(),
       body: SafeArea(
-        child: Stack(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Expanded(
-                  flex: 2,
-                  child: SideMenu(),
-                ),
-                Expanded(
-                  flex: 8,
-                  child: appProvider.filesWithoutAnimal.isEmpty
-                      ? const FilesUploading()
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(height: 30),
-                            Expanded(
-                              child: FilesViewWidget(
-                                title: 'Загруженные файлы',
-                                files: appProvider.filesWithoutAnimal,
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            Expanded(
-                              child: FilesViewWidget(
-                                title: 'Загруженные файлы',
-                                files: appProvider.filesWithoutAnimal,
-                                withFolders: true,
-                                dragNDropOn: false,
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                          ],
-                        ),
-                ),
-                appProvider.filesWithoutAnimal.isEmpty
-                    ? Container()
-                    : const Expanded(
-                        flex: 3,
-                        child: Statistics(),
-                      ),
-              ],
+            const Expanded(
+              flex: 2,
+              child: SideMenu(),
             ),
-            // Container(
-            //   width: double.infinity,
-            //   height: double.infinity,
-            //   color: AppColors.black.withOpacity(0.8),
-            //   child: Center(
-            //     child: ClipRRect(
-            //       borderRadius: BorderRadius.circular(20),
-            //       child: Container(
-            //           height: 120,
-            //           width: 160,
-            //           decoration: BoxDecoration(
-            //               color: AppColors.lightBlue,
-            //               borderRadius: BorderRadius.circular(20)),
-            //           child: Column(
-            //             children: [
-            //               Image.file(
-            //                 File(appProvider.filesWithoutAnimal[0].path),
-            //               ),
-            //             ],
-            //           )),
-            //     ),
-            //   ),
-            // ),
+            Expanded(
+              flex: 8,
+              child: appProvider.filesWithoutAnimal.isEmpty
+                  ? const FilesUploading()
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 30),
+                        Expanded(
+                          child: FilesViewWidget(
+                            title: 'Загруженные файлы',
+                            files: appProvider.filesWithoutAnimal,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Expanded(
+                          child: FilesViewWidget(
+                            title: 'Загруженные файлы',
+                            files: appProvider.filesWithoutAnimal,
+                            withFolders: true,
+                            dragNDropOn: false,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                      ],
+                    ),
+            ),
+            appProvider.filesWithoutAnimal.isEmpty
+                ? Container()
+                : const Expanded(
+                    flex: 3,
+                    child: Statistics(),
+                  ),
           ],
         ),
       ),

@@ -17,7 +17,7 @@ enum View {
 // ignore: must_be_immutable
 class FilesViewWidget extends StatefulWidget {
   List<File> files;
-  final String title;
+  String title;
   final bool dragNDropOn;
   final bool withFolders;
   FilesViewWidget({
@@ -153,6 +153,7 @@ class _FilesViewWidgetState extends State<FilesViewWidget> {
                                 text: 'Животные',
                                 onPressed: () {
                                   setState(() {
+                                    widget.title = 'Животные';
                                     view = View.grid;
                                     widget.files = Provider.of<AppProvider>(
                                             context,
@@ -171,6 +172,7 @@ class _FilesViewWidgetState extends State<FilesViewWidget> {
                                 text: 'Пустые фотографии',
                                 onPressed: () {
                                   setState(() {
+                                    widget.title = 'Пустые фотографии';
                                     view = View.grid;
                                     widget.files = Provider.of<AppProvider>(
                                             context,
