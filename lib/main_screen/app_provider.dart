@@ -3,9 +3,9 @@ import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:wildhack/models/file.dart';
-import 'package:http/http.dart' as http;
 
 enum AppState {
   empty, // когда файлы не загружены в систему
@@ -16,13 +16,16 @@ enum AppState {
 
 class AppProvider with ChangeNotifier {
 // сначала все файлы попадают сюда
-  List<File> _filesWithoutAnimal = [];
+  final List<File> _filesWithoutAnimal = [];
 
 // но если животное на фото будет, то он попадет сюда
-  List<File> _filesWithAnimal = [];
+  final List<File> _filesWithAnimal = [];
 
-  bool _isWaitingFilesFromBackend = false;
-  bool _userAborted = false;
+  AppState _appState = AppState.empty;
+
+  AppState get appState {
+    return _appState;
+  }
 
   List<File> get filesWithoutAnimal {
     return [..._filesWithoutAnimal];
@@ -30,14 +33,6 @@ class AppProvider with ChangeNotifier {
 
   List<File> get filesWithAnimal {
     return [..._filesWithAnimal];
-  }
-
-  bool get isWaitingFilesFromBackend {
-    return _isWaitingFilesFromBackend;
-  }
-
-  bool get userAborted {
-    return _userAborted;
   }
 
   List<File> get allLoadedFiles {
@@ -73,7 +68,7 @@ class AppProvider with ChangeNotifier {
       if (filesWithoutAnimal.isNotEmpty) {
         _chosenPlatformFiles.addAll(
           (await FilePicker.platform.pickFiles(
-                type: FileType.any,
+                type: FileType.image,
                 allowMultiple: true,
                 onFileLoading: (FilePickerStatus status) => print(status),
               ))
@@ -82,7 +77,7 @@ class AppProvider with ChangeNotifier {
         );
       } else {
         _chosenPlatformFiles = (await FilePicker.platform.pickFiles(
-              type: FileType.any,
+              type: FileType.image,
               allowMultiple: true,
               onFileLoading: (FilePickerStatus status) => print(status),
             ))
@@ -106,7 +101,7 @@ class AppProvider with ChangeNotifier {
     } catch (e) {
       print(e.toString());
     }
-    _userAborted = filesWithoutAnimal.isEmpty;
+    if (filesWithoutAnimal.isNotEmpty) _appState = AppState.waiting;
     notifyListeners();
   }
 
@@ -116,7 +111,7 @@ class AppProvider with ChangeNotifier {
     _filesWithoutAnimal.addAll(files);
 // // удаление повторяющихся файлов
 // _filesWithoutAnimal = filesWithoutAnimal.toSet().toList();
-    _userAborted = filesWithoutAnimal.isEmpty;
+    _appState = AppState.waiting;
     notifyListeners();
   }
 
@@ -125,6 +120,8 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
     try {
       _filesWithoutAnimal.clear();
+      _filesWithAnimal.clear();
+      _appState = AppState.empty;
     } on PlatformException catch (e) {
       print("PlatformException " + e.toString());
     } catch (e) {
@@ -133,9 +130,11 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // отправить загруженные файлы на бэк
+// отправить загруженные файлы на бэк
   Future<void> sendFilePathsToBackend() async {
-    // // отправляем список файлов на бэк
+    // отправляем список файлов на бэк
+    _appState = AppState.loading;
+    notifyListeners();
     final url = Uri.parse('http://192.168.50.65:1488/api/parser');
     List<String> filePaths = [];
     for (var chosenFile in filesWithoutAnimal) {
@@ -151,11 +150,10 @@ class AppProvider with ChangeNotifier {
     for (var chosenFile in _filesWithoutAnimal) {
       chosenFile.status = Status.loading;
     }
-    _isWaitingFilesFromBackend = true;
     notifyListeners();
 
-// смотрим, сколько файлов нам нужно получить с бэка
-    int howManyFilesShouldWeRecieve = filesWithoutAnimal.length;
+    // смотрим, сколько файлов нам нужно получить с бэка
+    int howManyFilesShouldWeRecieve = [..._filesWithoutAnimal].length;
 
     // получаем файлы с бэка, пока не получим все, что нужно
     // отправляем запрос раз в секунду, чтобы не убить сервер
@@ -164,14 +162,14 @@ class AppProvider with ChangeNotifier {
       await _getResultFromBackend();
     } while (allLoadedFiles.length < howManyFilesShouldWeRecieve);
 
-// окончание процесса обработки
-    _isWaitingFilesFromBackend = false;
+    // окончание процесса обработки
+    _appState = AppState.loaded;
     notifyListeners();
   }
 
-// получать результаты с бэка
+  // получать результаты с бэка
   Future<void> _getResultFromBackend() async {
-// отправляем запрос на получение списка из нескольких проверенных файлов
+    // отправляем запрос на получение списка из нескольких проверенных файлов
     final url = Uri.parse('http://192.168.50.65:1488/api/get');
     final response = await http.post(
       url,
@@ -209,5 +207,6 @@ class AppProvider with ChangeNotifier {
       }
       notifyListeners();
     }
+    notifyListeners();
   }
 }

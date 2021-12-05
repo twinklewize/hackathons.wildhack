@@ -19,14 +19,18 @@ class FilesViewWidget extends StatefulWidget {
   List<File> files;
   String title;
   final bool dragNDropOn;
-  final bool withFolders;
+  bool withFolders;
+  late String defaultTitle;
+
   FilesViewWidget({
     Key? key,
     required this.title,
     required this.files,
     this.dragNDropOn = true,
     this.withFolders = false,
-  }) : super(key: key);
+  }) : super(key: key) {
+    defaultTitle = title;
+  }
 
   @override
   _FilesViewWidgetState createState() => _FilesViewWidgetState();
@@ -110,7 +114,9 @@ class _FilesViewWidgetState extends State<FilesViewWidget> {
                             )
                           : Container(),
                       Text(
-                        widget.title,
+                        view == View.folders
+                            ? widget.defaultTitle
+                            : widget.title,
                         style: const TextStyle(
                           color: AppColors.darkGray,
                           fontWeight: FontWeight.w700,
@@ -218,26 +224,14 @@ class CustomGridView extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                    height: 120,
-                    width: 160,
-                    decoration: BoxDecoration(
-                        color: AppColors.lightBlue,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Column(
-                      children: [
-                        Image.file(io.File(files[index].path)),
-                        Flexible(
-                          child: Text(
-                            files[index].name,
-                            style: const TextStyle(
-                              color: AppColors.darkGray,
-                              fontWeight: FontWeight.w500,
-                              overflow: TextOverflow.clip,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )),
+                  decoration: BoxDecoration(
+                      color: AppColors.lightBlue,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Image.file(
+                    io.File(files[index].path),
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             );
           }),
@@ -256,99 +250,77 @@ class CustomListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController scrollController = ScrollController();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Expanded(
-        child: SingleChildScrollView(
-          child: Builder(
-            builder: (BuildContext context) => files.isNotEmpty
-                ? SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.23,
-                    child: Scrollbar(
-                      isAlwaysShown: true,
-                      controller: scrollController,
-                      child: ListView(
-                        controller: scrollController,
-                        children: [
-                          Table(
-                            columnWidths: const <int, TableColumnWidth>{
-                              0: FlexColumnWidth(),
-                              1: FlexColumnWidth(),
-                              2: FlexColumnWidth(),
-                            },
-                            defaultVerticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            children: <TableRow>[
-                              // заголовки
-                              TableRow(
-                                decoration: const BoxDecoration(),
-                                children: <Widget>[
-                                  tableCell('     Имя файла'),
-                                  tableCell('     Этап обработки'),
-                                  tableCell('     Размер файла'),
-                                ],
-                              ),
+    return Expanded(
+      child: ListView(
+        controller: scrollController,
+        children: [
+          Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FlexColumnWidth(),
+              1: FlexColumnWidth(),
+              2: FlexColumnWidth(),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: <TableRow>[
+              // заголовки
+              TableRow(
+                decoration: const BoxDecoration(),
+                children: <Widget>[
+                  tableCell('     Имя файла'),
+                  tableCell('     Этап обработки'),
+                  tableCell('     Размер файла'),
+                ],
+              ),
 
-                              //данные
-                              for (var file in files)
-                                file.status == Status.waiting
-                                    ? TableRow(
-                                        children: <Widget>[
-                                          tableCell("     " + file.name,
-                                              color: AppColors.darkGray),
-                                          tableCell('     ' + 'Ожидание',
-                                              color: AppColors.darkGray),
-                                          tableCell(
-                                              "     " +
-                                                  ((file.sizeInBytes / 1024) /
-                                                          1024)
-                                                      .toStringAsFixed(1) +
-                                                  " МБ",
-                                              color: AppColors.darkGray),
-                                        ],
-                                      )
-                                    : (file.status == Status.loading
-                                        ? TableRow(
-                                            children: <Widget>[
-                                              tableCell("     " + file.name,
-                                                  color: AppColors.blue),
-                                              tableCell('     ' + 'Обработка',
-                                                  color: AppColors.blue),
-                                              tableCell(
-                                                  "     " +
-                                                      ((file.sizeInBytes /
-                                                                  1024) /
-                                                              1024)
-                                                          .toStringAsFixed(1) +
-                                                      " МБ",
-                                                  color: AppColors.blue),
-                                            ],
-                                          )
-                                        : TableRow(
-                                            children: <Widget>[
-                                              tableCell("     " + file.name,
-                                                  color: AppColors.orange),
-                                              tableCell('     ' + 'Обработано',
-                                                  color: AppColors.orange),
-                                              tableCell(
-                                                  "     " +
-                                                      ((file.sizeInBytes /
-                                                                  1024) /
-                                                              1024)
-                                                          .toStringAsFixed(1) +
-                                                      " МБ",
-                                                  color: AppColors.orange),
-                                            ],
-                                          )),
-                            ],
-                          ),
+              //данные
+              for (var file in files)
+                file.status == Status.waiting
+                    ? TableRow(
+                        children: <Widget>[
+                          tableCell("     " + file.name,
+                              color: AppColors.darkGray),
+                          tableCell('     ' 'Ожидание',
+                              color: AppColors.darkGray),
+                          tableCell(
+                              "     " +
+                                  ((file.sizeInBytes / 1024) / 1024)
+                                      .toStringAsFixed(1) +
+                                  " МБ",
+                              color: AppColors.darkGray),
                         ],
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
+                      )
+                    : (file.status == Status.loading
+                        ? TableRow(
+                            children: <Widget>[
+                              tableCell("     " + file.name,
+                                  color: AppColors.blue),
+                              tableCell('     ' 'Обработка',
+                                  color: AppColors.blue),
+                              tableCell(
+                                  "     " +
+                                      ((file.sizeInBytes / 1024) / 1024)
+                                          .toStringAsFixed(1) +
+                                      " МБ",
+                                  color: AppColors.blue),
+                            ],
+                          )
+                        : TableRow(
+                            children: <Widget>[
+                              tableCell("     " + file.name,
+                                  color: AppColors.orange),
+                              tableCell('     ' + 'Обработано',
+                                  color: AppColors.orange),
+                              tableCell(
+                                  "     " +
+                                      ((file.sizeInBytes / 1024) / 1024)
+                                          .toStringAsFixed(1) +
+                                      " МБ",
+                                  color: AppColors.orange),
+                            ],
+                          )),
+            ],
           ),
-        ),
+        ],
       ),
     );
   }
