@@ -20,13 +20,16 @@ class FilesViewWidget extends StatefulWidget {
   String title;
   final bool dragNDropOn;
   final bool withFolders;
+  late String defaultTitle;
+  // ignore: use_key_in_widget_constructors
   FilesViewWidget({
-    Key? key,
     required this.title,
     required this.files,
     this.dragNDropOn = true,
     this.withFolders = false,
-  }) : super(key: key);
+  }) {
+    defaultTitle = title;
+  }
 
   @override
   _FilesViewWidgetState createState() => _FilesViewWidgetState();
@@ -110,7 +113,9 @@ class _FilesViewWidgetState extends State<FilesViewWidget> {
                             )
                           : Container(),
                       Text(
-                        widget.title,
+                        view == View.folders
+                            ? widget.defaultTitle
+                            : widget.title,
                         style: const TextStyle(
                           color: AppColors.darkGray,
                           fontWeight: FontWeight.w700,
