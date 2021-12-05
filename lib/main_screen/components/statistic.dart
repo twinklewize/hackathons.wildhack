@@ -11,6 +11,7 @@ class Statistics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context, listen: true);
     return Container(
       color: AppColors.white,
       height: MediaQuery.of(context).size.height,
@@ -18,29 +19,30 @@ class Statistics extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Title(text: 'Статистика'),
-          // const StatisticsCardWithDiagram(
-          //   mainText: 'Всего фото \nобработано',
-          //   amount: 100,
-          //   total: 560,
-          //   color: AppColors.blue,
-          // ),
-          // const StatisticsCardWithDiagram(
-          //   mainText: 'Фотографий \nживотных',
-          //   amount: 30,
-          //   total: 43,
-          //   color: AppColors.lightOrange,
-          // ),
-          StatisticsCard(
-            mainText: 'Фотографий \nзагружено',
-            total: Provider.of<AppProvider>(context, listen: true)
-                .filesWithoutAnimal
-                .length,
+          StatisticsCardWithDiagram(
+            mainText: 'Всего фото \nобработано',
+            amount: appProvider.allLoadedFiles.length,
+            total: appProvider.filesWithAnimal.length +
+                appProvider.filesWithoutAnimal.length,
+            color: AppColors.blue,
           ),
+          StatisticsCardWithDiagram(
+            mainText: 'Фотографий \nживотных',
+            amount: appProvider.filesWithAnimal.length,
+            total: appProvider.allLoadedFiles.length,
+            color: AppColors.lightOrange,
+          ),
+          // StatisticsCard(
+          //   mainText: 'Фотографий \nзагружено',
+          //   total: Provider.of<AppProvider>(context, listen: true)
+          //       .filesWithoutAnimal
+          //       .length,
+          // ),
           // const StatisticsCard(
           //   mainText: 'Видео \nзагружено',
           //   total: 43,
           // ),
-          // const Status(color: AppColors.blue, text: 'Данные обрабатываются'),
+          const Status(color: AppColors.blue, text: 'Данные обрабатываются'),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
@@ -57,7 +59,9 @@ class Statistics extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
             child: LongFilledButton(
               buttonColor: AppColors.blue,
-              onPressed: () {},
+              onPressed: () {
+                appProvider.sendFilePathsToBackend();
+              },
               textValue: 'Начать обработку',
               textColor: AppColors.white,
             ),
@@ -138,7 +142,7 @@ class StatisticsCardWithDiagram extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             height: 128,
             width: double.infinity,
             decoration: BoxDecoration(
@@ -252,8 +256,8 @@ class StatisticsCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-        height: 128,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        height: 104,
         width: double.infinity,
         decoration: BoxDecoration(
           color: AppColors.lightBlue,

@@ -8,18 +8,24 @@ import 'package:path/path.dart';
 import 'package:wildhack/constants/colors.dart';
 import 'package:wildhack/models/file.dart';
 
-enum View { grid, list }
+enum View {
+  grid,
+  list,
+  folders,
+}
 
 // ignore: must_be_immutable
 class FilesViewWidget extends StatefulWidget {
   List<File> files;
   final String title;
   final bool dragNDropOn;
+  final bool withFolders;
   FilesViewWidget({
     Key? key,
     required this.title,
     required this.files,
     this.dragNDropOn = true,
+    this.withFolders = false,
   }) : super(key: key);
 
   @override
@@ -27,7 +33,18 @@ class FilesViewWidget extends StatefulWidget {
 }
 
 class _FilesViewWidgetState extends State<FilesViewWidget> {
-  View view = View.grid;
+  bool _isInit = true;
+  late View view;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      widget.withFolders ? view = View.folders : view = View.list;
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -68,6 +85,30 @@ class _FilesViewWidgetState extends State<FilesViewWidget> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      (view != View.folders && widget.withFolders == true)
+                          ? Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      view = View.folders;
+                                    });
+                                  },
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: SvgPicture.asset(
+                                      'assets/icons/back_arrow_icon.svg',
+                                      color: AppColors.darkGray,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                )
+                              ],
+                            )
+                          : Container(),
                       Text(
                         widget.title,
                         style: const TextStyle(
@@ -76,6 +117,7 @@ class _FilesViewWidgetState extends State<FilesViewWidget> {
                           fontSize: 20,
                         ),
                       ),
+                      const Spacer(),
                       InkWell(
                         onTap: () {
                           setState(() {
@@ -88,14 +130,57 @@ class _FilesViewWidgetState extends State<FilesViewWidget> {
                         },
                         child: view == View.grid
                             ? SvgPicture.asset('assets/icons/list_icon.svg')
-                            : SvgPicture.asset('assets/icons/grid_icon.svg'),
+                            : (view == View.list
+                                ? SvgPicture.asset('assets/icons/grid_icon.svg')
+                                : Container()),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
                 view == View.list
                     ? CustomListView(files: widget.files)
-                    : CustomGridView(files: widget.files)
+                    : (view == View.grid
+                        ? CustomGridView(files: widget.files)
+                        : Row(
+                            children: [
+                              FolderWidget(
+                                color: AppColors.lightOrange,
+                                amount: Provider.of<AppProvider>(context,
+                                        listen: true)
+                                    .filesWithAnimal
+                                    .length,
+                                text: 'Животные',
+                                onPressed: () {
+                                  setState(() {
+                                    view = View.grid;
+                                    widget.files = Provider.of<AppProvider>(
+                                            context,
+                                            listen: false)
+                                        .filesWithAnimal;
+                                  });
+                                },
+                              ),
+                              const SizedBox(width: 50),
+                              FolderWidget(
+                                color: AppColors.darkGray,
+                                amount: Provider.of<AppProvider>(context,
+                                        listen: true)
+                                    .allLoadedButEmpty
+                                    .length,
+                                text: 'Пустые фотографии',
+                                onPressed: () {
+                                  setState(() {
+                                    view = View.grid;
+                                    widget.files = Provider.of<AppProvider>(
+                                            context,
+                                            listen: false)
+                                        .allLoadedButEmpty;
+                                  });
+                                },
+                              ),
+                            ],
+                          )),
               ],
             ),
           ),
@@ -204,16 +289,55 @@ class CustomListView extends StatelessWidget {
 
                               //данные
                               for (var file in files)
-                                TableRow(
-                                  children: <Widget>[
-                                    tableCell("     " + file.name),
-                                    tableCell('     ' + file.status.toString()),
-                                    tableCell("     " +
-                                        ((file.sizeInBytes / 1024) / 1024)
-                                            .toStringAsFixed(1) +
-                                        " МБ"),
-                                  ],
-                                ),
+                                file.status == Status.waiting
+                                    ? TableRow(
+                                        children: <Widget>[
+                                          tableCell("     " + file.name,
+                                              color: AppColors.darkGray),
+                                          tableCell('     ' + 'Ожидание',
+                                              color: AppColors.darkGray),
+                                          tableCell(
+                                              "     " +
+                                                  ((file.sizeInBytes / 1024) /
+                                                          1024)
+                                                      .toStringAsFixed(1) +
+                                                  " МБ",
+                                              color: AppColors.darkGray),
+                                        ],
+                                      )
+                                    : (file.status == Status.loading
+                                        ? TableRow(
+                                            children: <Widget>[
+                                              tableCell("     " + file.name,
+                                                  color: AppColors.blue),
+                                              tableCell('     ' + 'Обработка',
+                                                  color: AppColors.blue),
+                                              tableCell(
+                                                  "     " +
+                                                      ((file.sizeInBytes /
+                                                                  1024) /
+                                                              1024)
+                                                          .toStringAsFixed(1) +
+                                                      " МБ",
+                                                  color: AppColors.blue),
+                                            ],
+                                          )
+                                        : TableRow(
+                                            children: <Widget>[
+                                              tableCell("     " + file.name,
+                                                  color: AppColors.orange),
+                                              tableCell('     ' + 'Обработано',
+                                                  color: AppColors.orange),
+                                              tableCell(
+                                                  "     " +
+                                                      ((file.sizeInBytes /
+                                                                  1024) /
+                                                              1024)
+                                                          .toStringAsFixed(1) +
+                                                      " МБ",
+                                                  color: AppColors.orange),
+                                            ],
+                                          )),
                             ],
                           ),
                         ],
@@ -227,7 +351,7 @@ class CustomListView extends StatelessWidget {
     );
   }
 
-  Widget tableCell(String text) {
+  Widget tableCell(String text, {Color color = AppColors.lightGray}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,8 +360,65 @@ class CustomListView extends StatelessWidget {
           text,
           maxLines: 1,
           overflow: TextOverflow.clip,
+          style: TextStyle(color: color, fontWeight: FontWeight.w500),
         ),
         const Divider(),
+      ],
+    );
+  }
+}
+
+class FolderWidget extends StatelessWidget {
+  final Color color;
+  final int amount;
+  final String text;
+  final Function onPressed;
+  const FolderWidget({
+    Key? key,
+    required this.color,
+    required this.amount,
+    required this.text,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          children: [
+            InkWell(
+              onTap: () {
+                onPressed();
+              },
+              child: SvgPicture.asset(
+                'assets/icons/folder_icon.svg',
+                color: color,
+              ),
+            ),
+            Positioned(
+              bottom: 15,
+              left: 20,
+              child: Text(
+                '$amount',
+                style: const TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          text,
+          style: const TextStyle(
+            color: AppColors.darkGray,
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+          ),
+        ),
       ],
     );
   }
