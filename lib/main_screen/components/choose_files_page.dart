@@ -35,9 +35,9 @@ class ChooseFilesPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: DropTarget(
-          onDragDone: (details) async {
+          onDragDone: (details) {
             files.addAll(details.urls);
-            await Provider.of<AppProvider>(context, listen: false)
+            Provider.of<AppProvider>(context, listen: false)
                 .pickFilesWithDragNDrop(
               files
                   .map(
@@ -46,6 +46,8 @@ class ChooseFilesPage extends StatelessWidget {
                       name: basename(uri.toFilePath()),
                       sizeInBytes:
                           io.File(uri.toFilePath()).statSync().size.toDouble(),
+                      isAnimal: false,
+                      status: Status.waiting,
                     ),
                   )
                   .toList(),
@@ -65,7 +67,7 @@ class ChooseFilesPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     // "Загруженные файлы" и заголовки таблицы
-                    appProvider.chosenFiles.isNotEmpty
+                    appProvider.filesWithoutAnimal.isNotEmpty
                         ?
                         //  'Загруженные файлы'
                         const Padding(
@@ -97,7 +99,7 @@ class ChooseFilesPage extends StatelessWidget {
                                 )
 
                               // отображаем таблицу загруженных файлов
-                              : appProvider.chosenFiles.isNotEmpty
+                              : appProvider.filesWithoutAnimal.isNotEmpty
                                   ? Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 30),
@@ -135,8 +137,8 @@ class ChooseFilesPage extends StatelessWidget {
                                                 ),
 
                                                 //данные
-                                                for (var file
-                                                    in appProvider.chosenFiles)
+                                                for (var file in appProvider
+                                                    .filesWithoutAnimal)
                                                   TableRow(
                                                     children: <Widget>[
                                                       tableCell(

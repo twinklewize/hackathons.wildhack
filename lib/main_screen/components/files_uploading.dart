@@ -44,6 +44,8 @@ class _FilesUploadingState extends State<FilesUploading> {
                     name: basename(io.File(e.toFilePath()).path),
                     sizeInBytes:
                         io.File(e.toFilePath()).statSync().size.toDouble(),
+                    isAnimal: false,
+                    status: Status.waiting,
                   ),
                 )
                 .toList(),

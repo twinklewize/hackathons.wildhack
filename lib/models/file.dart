@@ -30,5 +30,7 @@ class File {
     required this.path,
     required this.name,
     required this.sizeInBytes,
+    required this.isAnimal,
+    required this.status,
   });
 }

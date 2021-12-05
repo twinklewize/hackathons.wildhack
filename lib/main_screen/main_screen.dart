@@ -28,12 +28,12 @@ class MainScreen extends StatelessWidget {
             Expanded(
               flex: 8,
               // child: ChooseFilesPage(),
-              // child: appProvider.chosenFiles.isEmpty
-              //     ? FilesUploading()
-              //     : ChooseFilesPage(),
-              child: GridViewPage(),
+              child: appProvider.filesWithoutAnimal.isEmpty
+                  ? const FilesUploading()
+                  : ChooseFilesPage(),
+              //child: GridViewPage(),
             ),
-            appProvider.chosenFiles.isEmpty
+            appProvider.filesWithoutAnimal.isEmpty
                 ? Container()
                 : const Expanded(
                     flex: 3,
