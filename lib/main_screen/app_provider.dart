@@ -143,11 +143,90 @@ class AppProvider with ChangeNotifier {
   }
 
 // отправить загруженные файлы на бэк
+//   Future<void> sendFilePathsToBackend() async {
+//     // отправляем список файлов на бэк
+//     _appState = AppState.loading;
+//     notifyListeners();
+//     final url = Uri.parse('http://localhost:2021/api/parser');
+//     List<String> filePaths = [];
+//     for (var chosenFile in filesWithoutAnimal) {
+//       filePaths.add(chosenFile.path);
+//     }
+//     final response = await http.post(
+//       url,
+//       headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
+//       body: json.encode(filePaths),
+//     );
+//     print(response.body);
+
+// // присваиваем всем файлам режим "в обработке"
+//     for (var chosenFile in filesWithoutAnimal) {
+//       chosenFile.status = Status.loading;
+//     }
+//     _isWaitingFilesFromBackend = true;
+//     notifyListeners();
+
+// // смотрим, сколько файлов нам нужно получить с бэка
+//     int howManyFilesShouldWeRecieve = filesWithoutAnimal.length;
+
+// // получаем файлы с бэка, пока не получим все, что нужно
+// // отправляем запрос раз в секунду, чтобы не убить сервер
+//     while (filesWithAnimal.length < howManyFilesShouldWeRecieve) {
+//       await Future.delayed(const Duration(seconds: 1));
+//       await _getResultFromBackend();
+//       //await _getResultFromFakeBackend(filePaths);
+//     }
+
+// // окончание процесса обработки
+//     _isWaitingFilesFromBackend = false;
+//     notifyListeners();
+//   }
+
+// // получать результаты с бэка
+//   Future<void> _getResultFromBackend() async {
+// // отправляем запрос на получение списка из нескольких проверенных файлов
+//     _appState = AppState.loading;
+//     final url = Uri.parse('http://localhost:2021/api/getResults');
+//     final response = await http.post(
+//       url,
+//       headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
+//       body: json.encode({}),
+//     );
+//     print(response.body);
+//     final decodedResponse = jsonDecode(response.body);
+
+// // добавляем каждый пришедший файл в список с животными и удаляем из списка без животных
+//     for (var responseFile in decodedResponse) {
+//       if (responseFile['isAnimal'] == true) {
+// // добавление в список с животными
+//         _filesWithAnimal.add(
+//           File(
+//             path: responseFile['path'],
+//             name: basename(responseFile['path']),
+//             sizeInBytes:
+//                 io.File(responseFile['path']).statSync().size.toDouble(),
+//             isAnimal: responseFile['isAnimal'],
+//             status: Status.loaded,
+//           ),
+//         );
+// // удаление из списка без животных
+//         _filesWithoutAnimal
+//             .removeWhere((element) => element.path == responseFile['path']);
+//       } else {
+//         for (var file in _filesWithoutAnimal) {
+//           file.status = Status.loaded;
+//         }
+//       }
+//     }
+//     notifyListeners();
+//   }
+
+// отправить загруженные файлы на бэк
   Future<void> sendFilePathsToBackend() async {
-    // отправляем список файлов на бэк
+// // отправляем список файлов на бэк
     _appState = AppState.loading;
     notifyListeners();
-    final url = Uri.parse('http://localhost:2021/api/parser');
+    final url = Uri.parse('http://192.168.50.65:1488/api/parser');
     List<String> filePaths = [];
     for (var chosenFile in filesWithoutAnimal) {
       filePaths.add(chosenFile.path);
@@ -157,10 +236,9 @@ class AppProvider with ChangeNotifier {
       headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
       body: json.encode(filePaths),
     );
-    print(response.body);
 
 // присваиваем всем файлам режим "в обработке"
-    for (var chosenFile in filesWithoutAnimal) {
+    for (var chosenFile in _filesWithoutAnimal) {
       chosenFile.status = Status.loading;
     }
     _isWaitingFilesFromBackend = true;
@@ -171,22 +249,21 @@ class AppProvider with ChangeNotifier {
 
 // получаем файлы с бэка, пока не получим все, что нужно
 // отправляем запрос раз в секунду, чтобы не убить сервер
-    while (filesWithAnimal.length < howManyFilesShouldWeRecieve) {
-      await Future.delayed(const Duration(seconds: 1));
+    do {
       await _getResultFromBackend();
-      //await _getResultFromFakeBackend(filePaths);
-    }
+    } while (allLoadedFiles.length < howManyFilesShouldWeRecieve);
 
 // окончание процесса обработки
-    _appState = AppState.loaded;
     _isWaitingFilesFromBackend = false;
     notifyListeners();
   }
 
 // получать результаты с бэка
   Future<void> _getResultFromBackend() async {
+    _appState = AppState.loading;
+    notifyListeners();
 // отправляем запрос на получение списка из нескольких проверенных файлов
-    final url = Uri.parse('http://localhost:2021/api/getResults');
+    final url = Uri.parse('http://192.168.50.65:1488/api/get');
     final response = await http.post(
       url,
       headers: {io.HttpHeaders.contentTypeHeader: "application/json"},
@@ -195,7 +272,8 @@ class AppProvider with ChangeNotifier {
     print(response.body);
     final decodedResponse = jsonDecode(response.body);
 
-// добавляем каждый пришедший файл в список с животными и удаляем из списка без животных
+// добавляем каждый пришедший файл в список с животными
+// и удаляем из списка без животных
     for (var responseFile in decodedResponse) {
       if (responseFile['isAnimal'] == true) {
 // добавление в список с животными
@@ -213,11 +291,14 @@ class AppProvider with ChangeNotifier {
         _filesWithoutAnimal
             .removeWhere((element) => element.path == responseFile['path']);
       } else {
-        for (var file in _filesWithoutAnimal) {
-          file.status = Status.loaded;
-        }
+// оставляем в папке без животных
+        _filesWithoutAnimal
+            .firstWhere((file) => file.path == responseFile['path'])
+            .status = Status.loaded;
       }
+      notifyListeners();
     }
+    _appState = AppState.loaded;
     notifyListeners();
   }
 }

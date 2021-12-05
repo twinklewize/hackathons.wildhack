@@ -103,7 +103,7 @@ class MiddlePart extends StatelessWidget {
             Expanded(
               child: FilesViewWidget(
                 title: 'Пустые фотографии',
-                files: appProvider.filesWithoutAnimal,
+                files: appProvider.allLoadedButEmpty,
                 dragNDropOn: false,
               ),
             ),

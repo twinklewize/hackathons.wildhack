@@ -58,7 +58,8 @@ class Statistics extends StatelessWidget {
               : const SizedBox(),
           const Spacer(),
           appProvider.appState == AppState.waiting ||
-                  appProvider.appState == AppState.loading
+                  appProvider.appState == AppState.loading ||
+                  appProvider.appState == AppState.loaded
               ? Padding(
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
                   child: LongEmptyButton(
@@ -89,7 +90,9 @@ class Statistics extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 100),
                   child: LongFilledButton(
                     buttonColor: AppColors.lightBlue,
-                    onPressed: () {},
+                    onPressed: () {
+                      appProvider.sendFilePathsToBackend();
+                    },
                     textValue: 'Продолжить',
                     textColor: AppColors.darkGray,
                   ),
