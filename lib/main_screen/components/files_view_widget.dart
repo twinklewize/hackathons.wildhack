@@ -229,7 +229,7 @@ class CustomGridView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20)),
                   child: Image.file(
                     io.File(files[index].path),
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
                 ),
               ),

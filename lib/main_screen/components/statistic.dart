@@ -172,7 +172,7 @@ class Statistics extends StatelessWidget {
                   child: LongFilledButton(
                     buttonColor: AppColors.blue,
                     onPressed: () {
-                      appProvider.sendFilePathsToBackend();
+                      appProvider.sendFilePathsToFakeBackend();
                     },
                     textValue: 'Начать обработку',
                     textColor: AppColors.white,
@@ -185,7 +185,7 @@ class Statistics extends StatelessWidget {
                   child: LongFilledButton(
                     buttonColor: AppColors.lightBlue,
                     onPressed: () {
-                      appProvider.sendFilePathsToBackend();
+                      appProvider.sendFilePathsToFakeBackend();
                     },
                     textValue: 'Продолжить',
                     textColor: AppColors.darkGray,

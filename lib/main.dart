@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wildhack/constants/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:wildhack/main_screen/app_provider.dart';
 import 'package:wildhack/main_screen/main_screen.dart';

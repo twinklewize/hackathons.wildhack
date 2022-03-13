@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -208,5 +209,52 @@ class AppProvider with ChangeNotifier {
       notifyListeners();
     }
     notifyListeners();
+  }
+
+  // отправить загруженные файлы на бэк
+  Future<void> sendFilePathsToFakeBackend() async {
+    // отправляем список файлов на бэк
+    _appState = AppState.loading;
+    notifyListeners();
+
+    // присваиваем всем файлам режим "в обработке"
+    for (var chosenFile in _filesWithoutAnimal) {
+      chosenFile.status = Status.loading;
+    }
+    notifyListeners();
+
+    // смотрим, сколько файлов нам нужно получить с бэка
+    int howManyFilesShouldWeRecieve = [..._filesWithoutAnimal].length;
+
+    // получаем файлы с бэка, пока не получим все, что нужно
+    // отправляем запрос раз в секунду, чтобы не убить сервер
+    do {
+      await Future.delayed(const Duration(seconds: 3));
+      _getResultFromFakeBackend();
+    } while (allLoadedFiles.length < howManyFilesShouldWeRecieve);
+
+    // окончание процесса обработки
+    _appState = AppState.loaded;
+    notifyListeners();
+  }
+
+  // получать результаты с бэка
+  void _getResultFromFakeBackend() async {
+    // добавляем каждый пришедший файл в список с животными
+    // и удаляем из списка без животных
+    for (var file in _filesWithoutAnimal) {
+      Random random = Random();
+      if (random.nextInt(2) == 0) {
+        _filesWithAnimal.add(file);
+        _filesWithoutAnimal.remove(file);
+        file.isAnimal = true;
+        file.status = Status.loaded;
+      } else {
+        // оставляем в папке без животных
+        file.isAnimal = false;
+        file.status = Status.loaded;
+      }
+      notifyListeners();
+    }
   }
 }
